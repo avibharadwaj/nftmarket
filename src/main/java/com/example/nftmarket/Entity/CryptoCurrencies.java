@@ -10,10 +10,12 @@ public class CryptoCurrencies {
     private int cryptoId;
 
     private String currencyType;
-    private String balance;
+    private float balance;
 
-    public CryptoCurrencies(int cryptoId, String currencyType, String balance) {
-        this.cryptoId = cryptoId;
+    @ManyToOne
+    private Wallet wallet;
+
+    public CryptoCurrencies(String currencyType, float balance) {
         this.currencyType = currencyType;
         this.balance = balance;
     }
@@ -37,11 +39,19 @@ public class CryptoCurrencies {
         this.currencyType = currencyType;
     }
 
-    public String getBalance() {
+    public float getBalance() {
         return balance;
     }
 
-    public void setBalance(String balance) {
+    public void setBalance(float balance) {
         this.balance = balance;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 }

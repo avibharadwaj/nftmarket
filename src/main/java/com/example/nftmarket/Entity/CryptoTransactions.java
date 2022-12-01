@@ -21,13 +21,11 @@ public class CryptoTransactions {
     @ManyToOne
     private CryptoCurrencies cryptoCurrencies;
 
-    public CryptoTransactions(int cryptoTransactionId, String transactionType, float transactionAmount, float previousBalance, float updatedBalance, NFTCryptoTransactions nftCryptoTransactions, CryptoCurrencies cryptoCurrencies) {
-        this.cryptoTransactionId = cryptoTransactionId;
+    public CryptoTransactions(String transactionType, float transactionAmount, float previousBalance, float updatedBalance, CryptoCurrencies cryptoCurrencies) {
         this.transactionType = transactionType;
         this.transactionAmount = transactionAmount;
         this.previousBalance = previousBalance;
         this.updatedBalance = updatedBalance;
-        this.nftCryptoTransactions = nftCryptoTransactions;
         this.cryptoCurrencies = cryptoCurrencies;
     }
 

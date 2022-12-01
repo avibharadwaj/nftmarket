@@ -11,8 +11,8 @@ public class NFTCryptoTransactions {
     private int nftCryptoTransactionId;
 
     private float soldPrice;
-    private String sellerId;
-    private String buyerId;
+    private int sellerId;
+    private int buyerId;
     private Timestamp transactionTime;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -23,8 +23,7 @@ public class NFTCryptoTransactions {
     @JoinColumn(name = "cryptoTransactionId", referencedColumnName = "id")
     private CryptoTransactions cryptoTransactions;
 
-    public NFTCryptoTransactions(int nftCryptoTransactionId, float soldPrice, String sellerId, String buyerId, Timestamp transactionTime, NFTTransactions nftTransactions, CryptoTransactions cryptoTransactions) {
-        this.nftCryptoTransactionId = nftCryptoTransactionId;
+    public NFTCryptoTransactions(float soldPrice, int sellerId, int buyerId, Timestamp transactionTime, NFTTransactions nftTransactions, CryptoTransactions cryptoTransactions) {
         this.soldPrice = soldPrice;
         this.sellerId = sellerId;
         this.buyerId = buyerId;
@@ -52,19 +51,19 @@ public class NFTCryptoTransactions {
         this.soldPrice = soldPrice;
     }
 
-    public String getSellerId() {
+    public int getSellerId() {
         return sellerId;
     }
 
-    public void setSellerId(String sellerId) {
+    public void setSellerId(int sellerId) {
         this.sellerId = sellerId;
     }
 
-    public String getBuyerId() {
+    public int getBuyerId() {
         return buyerId;
     }
 
-    public void setBuyerId(String buyerId) {
+    public void setBuyerId(int buyerId) {
         this.buyerId = buyerId;
     }
 

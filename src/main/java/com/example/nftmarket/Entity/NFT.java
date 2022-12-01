@@ -22,14 +22,17 @@ public class NFT {
         private boolean isListedForSale;
         private String listingType;
 
+        private float listPrice;
+
+        private String currencyType;
+
         @ManyToOne
         private Wallet wallet;
 
         @OneToMany(targetEntity = NFTTransactions.class, cascade=CascadeType.ALL)
         private List<NFTTransactions> nftTransactionsList;
 
-        public NFT(int nftId, String tokenId, String smartContactAddress, String name, String type, String description, String imageUrl, String assetUrl, Timestamp lastRecordTime, boolean isListedForSale, String listingType, List<NFTTransactions> nftTransactionsList, Wallet wallet) {
-                this.nftId = nftId;
+        public NFT(String tokenId, String smartContactAddress, String name, String type, String description, String imageUrl, String assetUrl, Timestamp lastRecordTime, boolean isListedForSale, String listingType) {
                 this.tokenId = tokenId;
                 this.smartContactAddress = smartContactAddress;
                 this.name = name;
@@ -40,8 +43,8 @@ public class NFT {
                 this.lastRecordTime = lastRecordTime;
                 this.isListedForSale = isListedForSale;
                 this.listingType = listingType;
-                this.nftTransactionsList = nftTransactionsList;
-                this.wallet = wallet;
+//                this.nftTransactionsList = nftTransactionsList;
+//                this.wallet = wallet;
         }
 
         public NFT() {
@@ -151,5 +154,19 @@ public class NFT {
                 this.wallet = wallet;
         }
 
+        public float getListPrice() {
+                return listPrice;
+        }
 
+        public void setListPrice(float listPrice) {
+                this.listPrice = listPrice;
+        }
+
+        public String getCurrencyType() {
+                return currencyType;
+        }
+
+        public void setCurrencyType(String currencyType) {
+                this.currencyType = currencyType;
+        }
 }
