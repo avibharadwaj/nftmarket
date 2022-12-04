@@ -18,8 +18,8 @@ public class NFTTransactions {
     private String transactionStatus;
     private Timestamp currentMaxOfferExpTime;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "nftTransactions", fetch = FetchType.LAZY)
-    private NFTCryptoTransactions nftCryptoTransactions;
+    @OneToMany(targetEntity = NFTCryptoTransactions.class, cascade=CascadeType.ALL)
+    private List<NFTCryptoTransactions> nftCryptoTransactions;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "nftTransactions", fetch = FetchType.LAZY)
     private PricedSaleHistory pricedSaleHistory;
@@ -49,11 +49,11 @@ public class NFTTransactions {
         this.nftTransactionId = nftTransactionId;
     }
 
-    public NFTCryptoTransactions getNftCryptoTransactions() {
+    public List<NFTCryptoTransactions> getNftCryptoTransactions() {
         return nftCryptoTransactions;
     }
 
-    public void setNftCryptoTransactions(NFTCryptoTransactions nftCryptoTransactions) {
+    public void setNftCryptoTransactions(List<NFTCryptoTransactions> nftCryptoTransactions) {
         this.nftCryptoTransactions = nftCryptoTransactions;
     }
 

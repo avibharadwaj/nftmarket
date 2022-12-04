@@ -10,10 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+// TO DO
+
+/**
+ * Add feature to check expiration time and update wallet automatically
+ */
 
 @Service
 public class NFTService {
@@ -31,12 +34,6 @@ public class NFTService {
     private NFTTransactionsRepo nftTransactionsRepo;
 
     @Autowired
-    private CryptoCurrenciesRepo cryptoCurrenciesRepo;
-
-    @Autowired
-    private PricedSaleHistoryRepo pricedSaleHistoryRepo;
-
-    @Autowired
     private AuctionHistoryRepo auctionHistoryRepo;
 
     @Autowired
@@ -45,10 +42,20 @@ public class NFTService {
     @Autowired
     private NFTCryptoTransactionsRepo nftCryptoTransactionsRepo;
 
+    private final String LISTING_TYPE_PRICE = "priced";
+    private final String LISTING_TYPE_AUCTION = "auction";
+    private final String TRANSACTION_OPEN = "open";
+    private final String TRANSACTION_CLOSED = "closed";
+    private final String TRANSACTION_IN_PROGRESS = "inProgress";
+    private final String AUCTION_ON_GOING = "onGoing";
+    private final String AUCTION_ENDED = "ended";
+    private final String AUCTION_BID_SUPERSEDED = "superseded";
+    private final String AUCTION_OFFER_RESCINDED = "rescinded";
+
     public ResponseEntity<?> getNftsOfUser() throws JSONException {
         int user_id = 1;
         Users user = usersRepo.findById(user_id).get();
-        Wallet wallet =  user.getWallet();
+        Wallet wallet = user.getWallet();
         List<NFT> nfts = wallet.getNftList();
 
         if (nfts.size() == 0) {
@@ -93,8 +100,7 @@ public class NFTService {
             nftList.add(nft);
             wallet.setNftList(nftList);
             walletRepo.save(wallet);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("NFT creation failed", HttpStatus.BAD_REQUEST);
         }
@@ -111,8 +117,8 @@ public class NFTService {
 
             List<NFTTransactions> openOrInProgressTransactions = nftTransactionsList.
                     stream().
-                    filter(nftTransactions -> nftTransactions.getTransactionStatus().equalsIgnoreCase("open")
-                            || nftTransactions.getTransactionStatus().equalsIgnoreCase("inProgress")).
+                    filter(nftTransactions -> nftTransactions.getTransactionStatus().equalsIgnoreCase(TRANSACTION_OPEN)
+                            || nftTransactions.getTransactionStatus().equalsIgnoreCase(TRANSACTION_IN_PROGRESS)).
                     toList();
 
             if (openOrInProgressTransactions.size() == 0) {
@@ -121,8 +127,7 @@ public class NFTService {
                 nft.setListPrice(listPrice);
                 nft.setCurrencyType(currencyType);
 
-
-                NFTTransactions nftTransactions = new NFTTransactions(currencyType, listPrice, 0, "open", null);
+                NFTTransactions nftTransactions = new NFTTransactions(currencyType, listPrice, 0, TRANSACTION_OPEN, null);
                 nftTransactions.setNft(nft);
                 nftTransactionsList.add(nftTransactions);
                 //nft.setNftTransactionsList(nftTransactionsList);
@@ -132,8 +137,7 @@ public class NFTService {
             } else {
                 return new ResponseEntity<>("Given NFT already listed for sale", HttpStatus.BAD_REQUEST);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Operation failed", HttpStatus.BAD_REQUEST);
         }
@@ -145,7 +149,7 @@ public class NFTService {
 
         int user_id = 1;
         Users user = usersRepo.findById(user_id).get();
-        Wallet wallet =  user.getWallet();
+        Wallet wallet = user.getWallet();
         List<NFT> nfts = wallet.getNftList();
 
         List<NFT> listedNfts = nfts.stream().filter(NFT::isListedForSale).toList();
@@ -168,7 +172,7 @@ public class NFTService {
             entity.put("lastRecordTime", nft.getLastRecordTime());
             entity.put("isListedForSale", nft.isListedForSale());
             entity.put("saleType", nft.getListingType());
-            entity.put("listPrice",nft.getListPrice());
+            entity.put("listPrice", nft.getListPrice());
             entity.put("currencyType", nft.getCurrencyType());
             entities.add(entity);
         }
@@ -180,7 +184,7 @@ public class NFTService {
         try {
             NFT nft = nftRepo.findById(nftId).get();
             NFTTransactions openTransaction = getOpenTransaction(nft);
-            openTransaction.setTransactionStatus("closed");
+            openTransaction.setTransactionStatus(TRANSACTION_CLOSED);
             nft.setListedForSale(false);
             nftTransactionsRepo.save(openTransaction);
             nftRepo.save(nft);
@@ -204,7 +208,7 @@ public class NFTService {
             for (NFT nft : listedForSaleNfts) {
                 List<NFTTransactions> nftTransactions = nft.getNftTransactionsList();
                 List<NFTTransactions> openTransactions = nftTransactions.stream().filter(
-                        nftTransactions1 -> nftTransactions1.getTransactionStatus().equalsIgnoreCase("open")
+                        nftTransactions1 -> nftTransactions1.getTransactionStatus().equalsIgnoreCase(TRANSACTION_OPEN)
                 ).toList();
                 if (openTransactions.size() > 0) {
                     unSoldNfts.add(nft);
@@ -237,7 +241,7 @@ public class NFTService {
                     }
                     entity.put("highestOffer", maxBid);
                 }
-                entity.put("listPrice",nft.getListPrice());
+                entity.put("listPrice", nft.getListPrice());
                 entity.put("currencyType", nft.getCurrencyType());
                 entities.add(entity);
             }
@@ -253,8 +257,8 @@ public class NFTService {
         try {
             int user_id = 2;
             Users user = usersRepo.findById(user_id).get();
-            Wallet wallet = user.getWallet();
-            List<CryptoCurrencies> cryptoCurrencies = wallet.getCryptoCurrenciesList();
+            Wallet buyerWallet = user.getWallet();
+            List<CryptoCurrencies> cryptoCurrencies = buyerWallet.getCryptoCurrenciesList();
 
             NFT nft = nftRepo.findById(nftId).get();
             Optional<CryptoCurrencies> currency = cryptoCurrencies.stream().
@@ -271,102 +275,362 @@ public class NFTService {
             }
 
             // update currencies and wallets
-            CryptoCurrencies curr = currency.get();
-            float prevBalance = curr.getBalance();
+            CryptoCurrencies buyerCurrency = currency.get();
+            float prevBalance = buyerCurrency.getBalance();
             float currBalance = prevBalance - nft.getListPrice();
-            curr.setBalance(currBalance);
+            buyerCurrency.setBalance(currBalance);
 
-            Wallet prevWallet = nft.getWallet();
-            nft.setWallet(wallet);
-            prevWallet.getNftList().remove(nft);
+            Wallet sellerWallet = nft.getWallet();
+            nft.setWallet(buyerWallet);
+            sellerWallet.getNftList().remove(nft);
 
-            CryptoCurrencies prevCurr = prevWallet.getCryptoCurrenciesList().stream().
-                    filter(cryptoCurrencies1 -> cryptoCurrencies1.getCurrencyType().equalsIgnoreCase(curr.getCurrencyType())).
+            CryptoCurrencies sellerCurrency = sellerWallet.getCryptoCurrenciesList().stream().
+                    filter(cryptoCurrencies1 -> cryptoCurrencies1.getCurrencyType().equalsIgnoreCase(buyerCurrency.getCurrencyType())).
                     findFirst().
-                    orElse(new CryptoCurrencies(curr.getCurrencyType(), 0));
-            prevCurr.setBalance(prevCurr.getBalance() + nft.getListPrice());
+                    orElse(new CryptoCurrencies(buyerCurrency.getCurrencyType(), 0));
+            sellerCurrency.setBalance(sellerCurrency.getBalance() + nft.getListPrice());
 
             nft.setSmartContactAddress(nft.getSmartContactAddress() + user.getUserId());
             nft.setLastRecordTime(new Timestamp(System.currentTimeMillis()));
+            nft.setListedForSale(false);
 
             // update transactions
             NFTTransactions openTransaction = getOpenTransaction(nft);
-            openTransaction.setTransactionStatus("closed");
+            openTransaction.setTransactionStatus(TRANSACTION_CLOSED);
             openTransaction.setPricedSaleHistory(
-                    new PricedSaleHistory(new Timestamp(System.currentTimeMillis()), prevWallet.getWalletId(), wallet.getWalletId(), nft.getListPrice())
+                    new PricedSaleHistory(new Timestamp(System.currentTimeMillis()), sellerWallet.getWalletId(), buyerWallet.getWalletId(), nft.getListPrice())
             );
 
-            CryptoTransactions cryptoTransactions = new CryptoTransactions(
-                nft.getCurrencyType(), nft.getListPrice(), prevBalance, currBalance, curr
+            CryptoTransactions cryptoTransactionsBuyer = new CryptoTransactions(
+                    nft.getCurrencyType(), nft.getListPrice(), prevBalance, currBalance, buyerCurrency
+            );
+            CryptoTransactions cryptoTransactionsSeller = new CryptoTransactions(
+                    nft.getCurrencyType(), nft.getListPrice(), sellerCurrency.getBalance() - nft.getListPrice(), sellerCurrency.getBalance(), sellerCurrency
             );
 
-            NFTCryptoTransactions nftCryptoTransactions = new NFTCryptoTransactions(
-                    nft.getListPrice(), prevWallet.getWalletId(), wallet.getWalletId(), new Timestamp(System.currentTimeMillis()), openTransaction, cryptoTransactions
+            NFTCryptoTransactions nftCryptoTransactionsBuyer = new NFTCryptoTransactions(
+                    nft.getListPrice(), sellerWallet.getWalletId(), buyerWallet.getWalletId(), new Timestamp(System.currentTimeMillis()), openTransaction, cryptoTransactionsBuyer
+            );
+            NFTCryptoTransactions nftCryptoTransactionsSeller = new NFTCryptoTransactions(
+                    nft.getListPrice(), sellerWallet.getWalletId(), buyerWallet.getWalletId(), new Timestamp(System.currentTimeMillis()), openTransaction, cryptoTransactionsSeller
             );
 
-            cryptoTransactionsRepo.save(cryptoTransactions);
-            nftCryptoTransactionsRepo.save(nftCryptoTransactions);
+            List<NFTCryptoTransactions> cryptoTransactions = Arrays.asList(nftCryptoTransactionsSeller, nftCryptoTransactionsBuyer);
+            openTransaction.setNftCryptoTransactions(cryptoTransactions);
 
-            return new ResponseEntity<>("NFT " + nft.getName() + " is sold to user " + user.getUsername() + ". Sold by: " + prevWallet.getUser().getUsername(), HttpStatus.OK);
+            cryptoTransactionsRepo.save(cryptoTransactionsBuyer);
+            nftCryptoTransactionsRepo.save(nftCryptoTransactionsBuyer);
+            cryptoTransactionsRepo.save(cryptoTransactionsSeller);
+            nftCryptoTransactionsRepo.save(nftCryptoTransactionsSeller);
+
+            return new ResponseEntity<>("NFT " + nft.getName() + " is sold to user " + user.getUsername() + ". Sold by: " + sellerWallet.getUser().getUsername(), HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Operation Failed", HttpStatus.BAD_REQUEST);
         }
     }
 
-    public ResponseEntity<?> makeOfferAuctionItem(int nftId, float offerPrice, Timestamp expirationTime) {
+    public ResponseEntity<?> makeOfferAuctionItem(int nftId, float offerPrice, int expirationSeconds) {
 
-        int user_id = 2;
-        Users user = usersRepo.findById(user_id).get();
-        Wallet wallet = user.getWallet();
-        List<CryptoCurrencies> cryptoCurrencies = wallet.getCryptoCurrenciesList();
+        try {
+            int user_id = 2;
+            Users user = usersRepo.findById(user_id).get();
+            Wallet wallet = user.getWallet();
+            List<CryptoCurrencies> cryptoCurrencies = wallet.getCryptoCurrenciesList();
 
-        NFT nft = nftRepo.findById(nftId).get();
-        Optional<CryptoCurrencies> currency = cryptoCurrencies.stream().
-                filter(cryptoCurrencies1 -> cryptoCurrencies1.getCurrencyType().equalsIgnoreCase(nft.getCurrencyType())).
-                findFirst();
+            NFT nft = nftRepo.findById(nftId).get();
+            Optional<CryptoCurrencies> currency = cryptoCurrencies.stream().
+                    filter(cryptoCurrencies1 -> cryptoCurrencies1.getCurrencyType().equalsIgnoreCase(nft.getCurrencyType())).
+                    findFirst();
 
-        if (currency.isPresent()) {
-            CryptoCurrencies curr = currency.get();
-            NFTTransactions openTransaction = nft.getNftTransactionsList().stream().
-                    filter(nftTransactions1 -> !nftTransactions1.getTransactionStatus().equalsIgnoreCase("closed")).findFirst().get();
+            CryptoCurrencies buyerCurrency;
+            NFTTransactions openTransaction;
+            if (currency.isPresent()) {
+                buyerCurrency = currency.get();
+                openTransaction = nft.getNftTransactionsList().stream().
+                        filter(nftTransactions1 -> !nftTransactions1.getTransactionStatus().equalsIgnoreCase(TRANSACTION_CLOSED)).findFirst().get();
 
-            // offer lower than current maximum bid
-            if (openTransaction.getCurrentMaxBid() >= offerPrice) {
-                return new ResponseEntity<>("Existing offer in place with higher or equal bid price. Existing maximum offer: " + openTransaction.getCurrentMaxBid(), HttpStatus.BAD_REQUEST);
+                // offer lower than current maximum bid
+                if (openTransaction.getCurrentMaxBid() >= offerPrice) {
+                    return new ResponseEntity<>("Existing offer in place with higher or equal bid price. Existing maximum offer: " + openTransaction.getCurrentMaxBid(), HttpStatus.BAD_REQUEST);
+                }
+                // balance low to make offer
+                if (buyerCurrency.getBalance() < offerPrice) {
+                    return new ResponseEntity<>("Balance too low to make offer. Available balance: " + buyerCurrency.getBalance() + ". Current max offer: " + openTransaction.getCurrentMaxBid(), HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                // accepted currency not found
+                return new ResponseEntity<>("User " + user.getUsername() + " doesn't have the accepted crypto currency in his wallet to make offer this NFT: " + nft.getName(), HttpStatus.BAD_REQUEST);
             }
-            // balance low to make offer
-            if (curr.getBalance() < offerPrice) {
-                return new ResponseEntity<>("Balance too low to make offer. Available balance: " + curr.getBalance() + ". Current max offer: " + openTransaction.getCurrentMaxBid(), HttpStatus.BAD_REQUEST);
+
+            // parse expiration time
+            Timestamp expirationTime = Timestamp.from(new Timestamp(System.currentTimeMillis()).toInstant().plusSeconds(expirationSeconds));
+
+            // if this is the first bid, update only buyer wallet
+            if (openTransaction.getCurrentMaxBid() == 0) {
+                buyerCurrency.setBalance(buyerCurrency.getBalance() - offerPrice);
             }
-        } else {
-            // accepted currency not found
-            return new ResponseEntity<>("User " + user.getUsername() + " doesn't have the accepted crypto currency in his wallet to make offer this NFT: " + nft.getName(), HttpStatus.BAD_REQUEST);
+
+            // user's latest bid cancelling his previous bid -> which is the maximum bid already. Update old auction record and update buyer wallet
+            else if (openTransaction.getAuctionHistories().stream().anyMatch(
+                    auctionHistory -> auctionHistory.getBuyerWalletId() == wallet.getWalletId() &&
+                            !auctionHistory.isSold() &&
+                            auctionHistory.getAuctionStatus().equalsIgnoreCase(AUCTION_ON_GOING)
+            )) {
+                AuctionHistory auctionHistory = openTransaction.getAuctionHistories().stream().filter(
+                        auctionHistory1 -> !auctionHistory1.isSold() && auctionHistory1.getBuyerWalletId() == wallet.getWalletId()
+                ).findFirst().get();
+                auctionHistory.setAuctionStatus(AUCTION_BID_SUPERSEDED);
+
+                // update buyer wallet
+                buyerCurrency.setBalance(buyerCurrency.getBalance() + auctionHistory.getOfferPrice());
+                buyerCurrency.setBalance(buyerCurrency.getBalance() - offerPrice);
+            }
+
+            // user bidding higher than existing bid of other user, update old auction record and update both buyer and existing offered user wallet
+            else {
+                //update previous auction record
+                AuctionHistory existingAuctionHistory = openTransaction.getAuctionHistories().stream().filter(
+                        auctionHistory1 -> auctionHistory1.getAuctionStatus().equalsIgnoreCase(AUCTION_ON_GOING) &&
+                                !auctionHistory1.isSold()
+                ).findFirst().get();
+                existingAuctionHistory.setAuctionStatus(AUCTION_BID_SUPERSEDED);
+
+                //update buyer wallet and previous offer's wallet
+                Wallet prevOfferWallet = walletRepo.findById(existingAuctionHistory.getBuyerWalletId()).get();
+                CryptoCurrencies sellerCurrency = prevOfferWallet.getCryptoCurrenciesList().stream().filter(
+                        cryptoCurrencies1 -> cryptoCurrencies1.getCurrencyType().equalsIgnoreCase(nft.getCurrencyType())
+                ).findFirst().get();
+                sellerCurrency.setBalance(sellerCurrency.getBalance() + existingAuctionHistory.getOfferPrice());
+
+                buyerCurrency.setBalance(buyerCurrency.getBalance() - offerPrice);
+            }
+
+            // create new auction record
+            AuctionHistory auctionHistory = new AuctionHistory(offerPrice, new Timestamp(System.currentTimeMillis()), expirationTime, false, AUCTION_ON_GOING, wallet.getWalletId());
+            List<AuctionHistory> auctionHistories = new ArrayList<>();
+            auctionHistories.add(auctionHistory);
+            openTransaction.setAuctionHistories(auctionHistories);
+            openTransaction.setCurrentMaxBid(offerPrice);
+            openTransaction.setCurrentMaxOfferExpTime(expirationTime);
+            auctionHistory.setNftTransactions(openTransaction);
+
+            auctionHistoryRepo.save(auctionHistory);
+
+            return new ResponseEntity<>("Successfully placed your bid for " + nft.getName() + " for " + offerPrice + " that expires on " + expirationTime + ".", HttpStatus.ACCEPTED);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Operation Failed", HttpStatus.NOT_ACCEPTABLE);
         }
-
-
-        // TO DO
-        /**
-         * Update auction history wallet - set expiration time etc.,
-         * Update NFTTransaction with the data accordingly
-         * To keep track of currency balance for multiple offers - need to update wallet with reduced price, also update prev users wallet with new balance
-         * If existing max offer is by the same user, update it or add new record?
-         *
-         */
-
-        return new ResponseEntity<>("Operation Failed", HttpStatus.BAD_REQUEST);
-
     }
 
-    public ResponseEntity<?> cancelOfferAuctionItem(int nftId) {
+    public ResponseEntity<?> viewReceivedOffersForAuctionItem() throws JSONException {
 
-        /**
-         * Check if curr the highest offer is by the same user, else proceed
-         * Update auction table, add new param "auction_status" to have the status of offer tracked
-         *
-         */
+        try {
+            int userid = 1;
+            Wallet wallet = usersRepo.findById(userid).get().getWallet();
 
-        return new ResponseEntity<>("Operation Failed", HttpStatus.BAD_REQUEST);
+            List<NFT> nftList = wallet.getNftList().stream().filter(
+                    nft -> nft.isListedForSale() &&
+                            nft.getListingType().equalsIgnoreCase(LISTING_TYPE_AUCTION)
+            ).toList();
+
+            List<JSONObject> entities = new ArrayList<>();
+            for (NFT nft : nftList) {
+                JSONObject entity = new JSONObject();
+                entity.put("nftId", nft.getNftId());
+                entity.put("name", nft.getName());
+                entity.put("type", nft.getType());
+                entity.put("description", nft.getDescription());
+                entity.put("imageUrl", nft.getImageUrl());
+                entity.put("lastRecordTime", nft.getLastRecordTime());
+                entity.put("saleType", nft.getListingType());
+                NFTTransactions nftTransactions = nft.getNftTransactionsList().stream().
+                        max(Comparator.comparing(NFTTransactions::getCurrentMaxBid)).
+                        orElse(new NFTTransactions());
+                entity.put("highestOffer", nftTransactions.getCurrentMaxBid());
+                entity.put("highestOfferExpirationTime", nftTransactions.getCurrentMaxOfferExpTime());
+                if (nftTransactions.getCurrentMaxBid() != 0) {
+                    AuctionHistory auctionHistory = nftTransactions.getAuctionHistories().stream().filter(
+                            auctionHistory1 -> auctionHistory1.getAuctionStatus().equalsIgnoreCase(AUCTION_ON_GOING) &&
+                                    !auctionHistory1.isSold()
+                    ).findFirst().get();
+                    entity.put("highestOfferedUser", walletRepo.findById(auctionHistory.getBuyerWalletId()).get().getUser().getUsername());
+                    entity.put("offerId", auctionHistory.getAuctionUpdateId());
+                }
+                entity.put("bidsReceived", nftTransactions.getAuctionHistories().stream().filter(auctionHistory1 -> !auctionHistory1.isSold()).toList().size());
+                entity.put("listPrice", nft.getListPrice());
+                entity.put("currencyType", nft.getCurrencyType());
+                entities.add(entity);
+            }
+            return new ResponseEntity<>(entities.toString(), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Operation Failed", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> viewOffersMadeForAuctionItem() {
+        try {
+            int userid = 2;
+            Wallet wallet = usersRepo.findById(userid).get().getWallet();
+
+            List<AuctionHistory> auctionHistories = (List<AuctionHistory>) auctionHistoryRepo.findAll();
+            List<AuctionHistory> userAuctionHistory = auctionHistories.stream().filter(
+                    auctionHistory -> auctionHistory.getBuyerWalletId() == wallet.getWalletId()
+            ).toList();
+
+            if (userAuctionHistory.size() == 0) {
+                return new ResponseEntity<>("No bids made yet by the user", HttpStatus.BAD_REQUEST);
+            }
+
+            List<JSONObject> entities = new ArrayList<>();
+
+            for (AuctionHistory auctionHistory : userAuctionHistory) {
+                JSONObject entity = new JSONObject();
+                entity.put("nftId", auctionHistory.getNftTransactions().getNft().getNftId());
+                entity.put("name", auctionHistory.getNftTransactions().getNft().getName());
+                entity.put("type", auctionHistory.getNftTransactions().getNft().getType());
+                entity.put("description", auctionHistory.getNftTransactions().getNft().getDescription());
+                entity.put("saleType", auctionHistory.getNftTransactions().getNft().getListingType());
+                entity.put("listPrice", auctionHistory.getNftTransactions().getNft().getListPrice());
+                entity.put("offerPrice", auctionHistory.getOfferPrice());
+                entity.put("currencyType", auctionHistory.getNftTransactions().getNft().getCurrencyType());
+                entity.put("auctionStatus", auctionHistory.getAuctionStatus());
+                entity.put("isItemSold", auctionHistory.isSold());
+                entity.put("auctionBidId", auctionHistory.getAuctionUpdateId());
+                entities.add(entity);
+            }
+
+            return new ResponseEntity<>(entities.toString(), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Operation Failed", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> cancelOfferAuctionItem(int nftId, int auctionBidId) {
+
+        try {
+            int userid = 2;
+            Wallet wallet = usersRepo.findById(userid).get().getWallet();
+
+            NFT nft = nftRepo.findById(nftId).get();
+            Optional<AuctionHistory> ah = auctionHistoryRepo.findById(auctionBidId);
+            if (ah.isEmpty()) {
+                return new ResponseEntity<>("No auction ID matched with given request", HttpStatus.BAD_REQUEST);
+            }
+            AuctionHistory auctionHistory = ah.get();
+            NFTTransactions openTransaction = auctionHistory.getNftTransactions();
+
+            CryptoCurrencies buyerCurrency = wallet.getCryptoCurrenciesList().stream().filter(
+                    cryptoCurrencies -> cryptoCurrencies.getCurrencyType().equalsIgnoreCase(nft.getCurrencyType())
+            ).findFirst().get();
+
+            auctionHistory.setAuctionStatus(AUCTION_OFFER_RESCINDED);
+            buyerCurrency.setBalance(buyerCurrency.getBalance() + auctionHistory.getOfferPrice());
+
+            Optional<AuctionHistory> nextMaxOffer = openTransaction.getAuctionHistories().stream().filter(
+                    auctionHistory1 -> auctionHistory1.getAuctionStatus().equalsIgnoreCase(AUCTION_BID_SUPERSEDED)
+            ).max(Comparator.comparing(AuctionHistory::getOfferPrice));
+
+            if (nextMaxOffer.isPresent()) {
+                openTransaction.setCurrentMaxBid(nextMaxOffer.get().getOfferPrice());
+                openTransaction.setCurrentMaxOfferExpTime(nextMaxOffer.get().getExpirationTime());
+            } else {
+                openTransaction.setCurrentMaxBid(0);
+                openTransaction.setCurrentMaxOfferExpTime(null);
+            }
+
+            auctionHistoryRepo.save(auctionHistory);
+            return new ResponseEntity<>("Offer rescinded for the NFT " + nft.getName(), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Operation Failed", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> acceptOfferAuctionItem(int nftId, int auctionBidId) {
+        try {
+            int userid = 1;
+            Wallet sellerWallet = usersRepo.findById(userid).get().getWallet();
+
+            NFT nft = nftRepo.findById(nftId).get();
+            Optional<AuctionHistory> ah = auctionHistoryRepo.findById(auctionBidId);
+            if (ah.isEmpty()) {
+                return new ResponseEntity<>("No auction ID matched with given request", HttpStatus.BAD_REQUEST);
+            }
+            AuctionHistory auctionHistory = ah.get();
+            NFTTransactions openTransaction = auctionHistory.getNftTransactions();
+            Wallet buyerWallet = walletRepo.findById(auctionHistory.getBuyerWalletId()).get();
+
+            // update auction
+            auctionHistory.setAuctionStatus(AUCTION_ENDED);
+            auctionHistory.setSold(true);
+
+            // update NFT transaction
+            openTransaction.setTransactionStatus(TRANSACTION_CLOSED);
+
+            // update crypto balance
+            Optional<CryptoCurrencies> currency = sellerWallet.getCryptoCurrenciesList().stream().
+                    filter(cryptoCurrencies1 -> cryptoCurrencies1.getCurrencyType().equalsIgnoreCase(nft.getCurrencyType())).
+                    findFirst();
+
+            CryptoCurrencies sellerCurrency;
+            if (currency.isPresent()) {
+                sellerCurrency = currency.get();
+                sellerCurrency.setBalance(sellerCurrency.getBalance() + auctionHistory.getOfferPrice());
+            } else {
+                sellerCurrency = new CryptoCurrencies(nft.getCurrencyType(), auctionHistory.getOfferPrice());
+                List<CryptoCurrencies> cryptoCurrenciesList = new ArrayList<>();
+                cryptoCurrenciesList.add(sellerCurrency);
+                sellerWallet.setCryptoCurrenciesList(cryptoCurrenciesList);
+            }
+            // not setting up buyer currency since it is done during making bid
+
+            // update wallet
+            nft.setWallet(buyerWallet);
+            sellerWallet.getNftList().remove(nft);
+
+            // update nft
+            Users buyer = buyerWallet.getUser();
+            nft.setSmartContactAddress(nft.getSmartContactAddress() + buyer.getUserId());
+            nft.setLastRecordTime(new Timestamp(System.currentTimeMillis()));
+            nft.setListedForSale(false);
+
+            // update crypto and nft crypto transactions
+            CryptoCurrencies buyerCurrency = buyerWallet.getCryptoCurrenciesList().stream().filter(
+                    cryptoCurrencies -> cryptoCurrencies.getCurrencyType().equalsIgnoreCase(nft.getCurrencyType())
+            ).findFirst().get();
+            CryptoTransactions cryptoTransactionsBuyer = new CryptoTransactions(
+                    nft.getCurrencyType(), nft.getListPrice(), buyerCurrency.getBalance(), buyerCurrency.getBalance() - auctionHistory.getOfferPrice(), buyerCurrency
+            );
+            CryptoTransactions cryptoTransactionsSeller = new CryptoTransactions(
+                    nft.getCurrencyType(), nft.getListPrice(), sellerCurrency.getBalance() - auctionHistory.getOfferPrice(), sellerCurrency.getBalance(), sellerCurrency
+            );
+
+            NFTCryptoTransactions nftCryptoTransactionsBuyer = new NFTCryptoTransactions(
+                    nft.getListPrice(), sellerWallet.getWalletId(), buyerWallet.getWalletId(), new Timestamp(System.currentTimeMillis()), openTransaction, cryptoTransactionsBuyer
+            );
+            NFTCryptoTransactions nftCryptoTransactionsSeller = new NFTCryptoTransactions(
+                    nft.getListPrice(), sellerWallet.getWalletId(), buyerWallet.getWalletId(), new Timestamp(System.currentTimeMillis()), openTransaction, cryptoTransactionsSeller
+            );
+
+            List<NFTCryptoTransactions> cryptoTransactions = Arrays.asList(nftCryptoTransactionsSeller, nftCryptoTransactionsBuyer);
+            openTransaction.setNftCryptoTransactions(cryptoTransactions);
+
+            cryptoTransactionsRepo.save(cryptoTransactionsBuyer);
+            nftCryptoTransactionsRepo.save(nftCryptoTransactionsBuyer);
+            cryptoTransactionsRepo.save(cryptoTransactionsSeller);
+            nftCryptoTransactionsRepo.save(nftCryptoTransactionsSeller);
+
+            return new ResponseEntity<>("NFT " + nft.getName() + " is sold to user " + buyer.getUsername() + " through auctions for " + auctionHistory.getOfferPrice() + " " + nft.getCurrencyType() + ". Sold by: " + sellerWallet.getUser().getUsername(), HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Operation Failed", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private static NFTTransactions getOpenTransaction(NFT nft) {
@@ -377,4 +641,5 @@ public class NFTService {
                 findFirst().
                 get();
     }
+
 }

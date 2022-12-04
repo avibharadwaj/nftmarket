@@ -14,6 +14,8 @@ public class AuctionHistory {
     private Timestamp offerTime;
     private Timestamp expirationTime;
     private boolean isSold;
+    private String auctionStatus;
+    private int buyerWalletId;
 
     @ManyToOne
     private NFTTransactions nftTransactions;
@@ -21,13 +23,13 @@ public class AuctionHistory {
     public AuctionHistory() {
     }
 
-    public AuctionHistory(int auctionUpdateId, float offerPrice, Timestamp offerTime, Timestamp expirationTime, boolean isSold, NFTTransactions nftTransactions) {
-        this.auctionUpdateId = auctionUpdateId;
+    public AuctionHistory(float offerPrice, Timestamp offerTime, Timestamp expirationTime, boolean isSold, String auctionStatus, int buyerWalletId) {
         this.offerPrice = offerPrice;
         this.offerTime = offerTime;
         this.expirationTime = expirationTime;
         this.isSold = isSold;
-        this.nftTransactions = nftTransactions;
+        this.auctionStatus = auctionStatus;
+        this.buyerWalletId = buyerWalletId;
     }
 
     public int getAuctionUpdateId() {
@@ -68,6 +70,22 @@ public class AuctionHistory {
 
     public void setSold(boolean sold) {
         isSold = sold;
+    }
+
+    public String getAuctionStatus() {
+        return auctionStatus;
+    }
+
+    public void setAuctionStatus(String auctionStatus) {
+        this.auctionStatus = auctionStatus;
+    }
+
+    public int getBuyerWalletId() {
+        return buyerWalletId;
+    }
+
+    public void setBuyerWalletId(int buyerWalletId) {
+        this.buyerWalletId = buyerWalletId;
     }
 
     public NFTTransactions getNftTransactions() {

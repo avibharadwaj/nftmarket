@@ -15,8 +15,7 @@ public class NFTCryptoTransactions {
     private int buyerId;
     private Timestamp transactionTime;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "nftTransactionId", referencedColumnName = "id")
+    @ManyToOne
     private NFTTransactions nftTransactions;
 
     @OneToOne(cascade = CascadeType.ALL)

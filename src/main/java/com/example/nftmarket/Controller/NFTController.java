@@ -65,16 +65,34 @@ public class NFTController {
     public ResponseEntity<?> makeOfferAuctionItem(
             @RequestParam("nftId") int nftId,
             @RequestParam("offerPrice") float offerPrice,
-            @RequestParam("expirationTime") Timestamp expirationTime
+            @RequestParam("expirationSeconds") int expirationSeconds
     ) {
-        return nftService.makeOfferAuctionItem(nftId, offerPrice, expirationTime);
+        return nftService.makeOfferAuctionItem(nftId, offerPrice, expirationSeconds);
     }
 
     @PostMapping(value = "/buy/cancelOffer/auctionItem")
-    public ResponseEntity<?> makeOfferAuctionItem(
-            @RequestParam("nftId") int nftId
+    public ResponseEntity<?> cancelOfferAuctionItem(
+            @RequestParam("nftId") int nftId,
+            @RequestParam("auctionBidId") int auctionBidId
     ) {
-        return nftService.cancelOfferAuctionItem(nftId);
+        return nftService.cancelOfferAuctionItem(nftId, auctionBidId);
     }
 
+    @GetMapping(value = "/sell/viewOffers")
+    public ResponseEntity<?> viewOffersReceived() throws JSONException {
+        return nftService.viewReceivedOffersForAuctionItem();
+    }
+
+    @GetMapping(value = "/buy/viewOffers")
+    public ResponseEntity<?> viewOffersMade() throws JSONException {
+        return nftService.viewOffersMadeForAuctionItem();
+    }
+
+    @PostMapping(value = "/sell/acceptOffer/")
+    public ResponseEntity<?> acceptOfferAuctionItem(
+            @RequestParam("nftId") int nftId,
+            @RequestParam("auctionBidId") int auctionBidId
+    ) {
+        return nftService.acceptOfferAuctionItem(nftId, auctionBidId);
+    }
 }

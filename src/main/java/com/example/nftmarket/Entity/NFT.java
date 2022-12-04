@@ -43,8 +43,6 @@ public class NFT {
                 this.lastRecordTime = lastRecordTime;
                 this.isListedForSale = isListedForSale;
                 this.listingType = listingType;
-//                this.nftTransactionsList = nftTransactionsList;
-//                this.wallet = wallet;
         }
 
         public NFT() {
