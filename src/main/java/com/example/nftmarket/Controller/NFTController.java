@@ -1,16 +1,34 @@
 package com.example.nftmarket.Controller;
 
+import com.example.nftmarket.Entity.NFT;
 import com.example.nftmarket.Entity.Users;
 import com.example.nftmarket.Repository.UsersRepo;
 import com.example.nftmarket.Service.NFTService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.tomcat.util.json.JSONParser;
+import org.apache.tomcat.util.json.ParseException;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
-@RestController()
+
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+
+
+@Controller()
 @RequestMapping(value = "/nft")
 public class NFTController {
 
@@ -21,9 +39,25 @@ public class NFTController {
     private UsersRepo userRepo;
 
     @GetMapping(value = "/viewAll")
-    public ResponseEntity<?> getNfts(Principal principal) throws JSONException {
+    public String getNfts(Principal principal, Model model) throws JSONException {
         Users user = userRepo.findByEmail(principal.getName());
-        return nftService.getNftsOfUser(user);
+        ResponseEntity<?> nft = nftService.getNftsOfUser(user);
+        
+        NFT mynft = null;
+        String str = nft.getBody().toString().substring(1, nft.getBody().toString().length() - 1);
+        System.out.println("LOLLLLLLLLLLL------------"+str);
+        try {
+			 mynft = new ObjectMapper().readValue(str, NFT.class);
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        model.addAttribute("nft", mynft);
+        return "MyNFT";
     }
 
     @PostMapping(value = "/create")

@@ -45,10 +45,10 @@ public class UserController {
         return "Buy";
     }
     
-    @GetMapping(value = "/MyNFT")
-    public String myNFT() {
-        return "MyNFT";
-    }
+    //@GetMapping(value = "/MyNFT")
+    //public String myNFT() {
+    //    return "MyNFT";
+    //}
     
     @GetMapping(value = "/test")
     public String welcometest() {
