@@ -52,13 +52,13 @@ public class NFTService {
     private final String AUCTION_BID_SUPERSEDED = "superseded";
     private final String AUCTION_OFFER_RESCINDED = "rescinded";
 
-    public ResponseEntity<?> getNftsOfUser() throws JSONException {
-        int user_id = 1;
-        Users user = usersRepo.findById(user_id).get();
+    public ResponseEntity<?> getNftsOfUser(Users user) throws JSONException {
+        /*int user_id = 1;
+        Users user = usersRepo.findById(user_id).get();*/
         Wallet wallet = user.getWallet();
         List<NFT> nfts = wallet.getNftList();
 
-        if (nfts.size() == 0) {
+        if (nfts == null || nfts.size() == 0) {
             return new ResponseEntity<>("No nfts found", HttpStatus.BAD_REQUEST);
         }
 
@@ -80,7 +80,7 @@ public class NFTService {
         return new ResponseEntity<>(entities.toString(), HttpStatus.OK);
     }
 
-    public ResponseEntity<?> addNft(String name, String type, String desc, String imageUrl, String assetUrl) {
+    public ResponseEntity<?> addNft(String name, String type, String desc, String imageUrl, String assetUrl, Users user) {
 
         try {
             Timestamp currTime = new Timestamp(System.currentTimeMillis());
@@ -88,8 +88,8 @@ public class NFTService {
             String sca = tokenId + "address";
             NFT nft = new NFT(tokenId, sca, name, type, desc, imageUrl, assetUrl, currTime, false, null);
 
-            int user_id = 1;
-            Users user = usersRepo.findById(user_id).get();
+            /*int user_id = 1;
+            Users user = usersRepo.findById(user_id).get();*/
             System.out.println(user.getUsername());
             Wallet wallet = user.getWallet();
 
@@ -109,7 +109,7 @@ public class NFTService {
 
     }
 
-    public ResponseEntity<?> sellNft(int nftId, String currencyType, String saleType, float listPrice) {
+    public ResponseEntity<?> sellNft(int nftId, String currencyType, String saleType, float listPrice, Users user) {
 
         try {
             NFT nft = nftRepo.findById(nftId).get();
@@ -145,10 +145,10 @@ public class NFTService {
         return new ResponseEntity<>("NFT listed for sale: " + nftRepo.findById(nftId).get().getName(), HttpStatus.OK);
     }
 
-    public ResponseEntity<?> viewListedNfts() throws JSONException {
+    public ResponseEntity<?> viewListedNfts(Users user) throws JSONException {
 
-        int user_id = 1;
-        Users user = usersRepo.findById(user_id).get();
+        /*int user_id = 1;
+        Users user = usersRepo.findById(user_id).get();*/
         Wallet wallet = user.getWallet();
         List<NFT> nfts = wallet.getNftList();
 
@@ -180,7 +180,7 @@ public class NFTService {
         return new ResponseEntity<>(entities.toString(), HttpStatus.OK);
     }
 
-    public ResponseEntity<?> cancelListing(int nftId) {
+    public ResponseEntity<?> cancelListing(int nftId, Users user) {
         try {
             NFT nft = nftRepo.findById(nftId).get();
             NFTTransactions openTransaction = getOpenTransaction(nft);
@@ -195,11 +195,12 @@ public class NFTService {
         }
     }
 
-    public ResponseEntity<?> viewOnSaleNfts() {
+    public ResponseEntity<?> viewOnSaleNfts(Users user) {
         try {
             List<NFT> nftList = (List<NFT>) nftRepo.findAll();
 
-            int userId = 1;
+            //int userId = 1;
+            int userId = user.getUserId();
             List<NFT> listedForSaleNfts = nftList.stream().
                     filter(nft -> nft.isListedForSale() && nft.getWallet().getWalletId() != usersRepo.findById(userId).get().getWallet().getWalletId()).
                     toList();
@@ -253,10 +254,10 @@ public class NFTService {
         }
     }
 
-    public ResponseEntity<?> buyPricedNFT(int nftId) {
+    public ResponseEntity<?> buyPricedNFT(int nftId, Users user) {
         try {
-            int user_id = 2;
-            Users user = usersRepo.findById(user_id).get();
+            /*int user_id = 2;
+            Users user = usersRepo.findById(user_id).get();*/
             Wallet buyerWallet = user.getWallet();
             List<CryptoCurrencies> cryptoCurrencies = buyerWallet.getCryptoCurrenciesList();
 
@@ -330,11 +331,11 @@ public class NFTService {
         }
     }
 
-    public ResponseEntity<?> makeOfferAuctionItem(int nftId, float offerPrice, int expirationSeconds) {
+    public ResponseEntity<?> makeOfferAuctionItem(int nftId, float offerPrice, int expirationSeconds, Users user) {
 
         try {
-            int user_id = 2;
-            Users user = usersRepo.findById(user_id).get();
+            /*int user_id = 2;
+            Users user = usersRepo.findById(user_id).get()*/;
             Wallet wallet = user.getWallet();
             List<CryptoCurrencies> cryptoCurrencies = wallet.getCryptoCurrenciesList();
 
@@ -425,10 +426,11 @@ public class NFTService {
         }
     }
 
-    public ResponseEntity<?> viewReceivedOffersForAuctionItem() throws JSONException {
+    public ResponseEntity<?> viewReceivedOffersForAuctionItem(Users user) throws JSONException {
 
         try {
-            int userid = 1;
+            //int userid = 1;
+            int userid = user.getUserId();
             Wallet wallet = usersRepo.findById(userid).get().getWallet();
 
             List<NFT> nftList = wallet.getNftList().stream().filter(
@@ -471,9 +473,10 @@ public class NFTService {
         }
     }
 
-    public ResponseEntity<?> viewOffersMadeForAuctionItem() {
+    public ResponseEntity<?> viewOffersMadeForAuctionItem(Users user) {
         try {
-            int userid = 2;
+            //int userid = 2;
+            int userid = user.getUserId();
             Wallet wallet = usersRepo.findById(userid).get().getWallet();
 
             List<AuctionHistory> auctionHistories = (List<AuctionHistory>) auctionHistoryRepo.findAll();
@@ -510,10 +513,11 @@ public class NFTService {
         }
     }
 
-    public ResponseEntity<?> cancelOfferAuctionItem(int nftId, int auctionBidId) {
+    public ResponseEntity<?> cancelOfferAuctionItem(int nftId, int auctionBidId, Users user) {
 
         try {
-            int userid = 2;
+            //int userid = 2;
+            int userid = user.getUserId();
             Wallet wallet = usersRepo.findById(userid).get().getWallet();
 
             NFT nft = nftRepo.findById(nftId).get();
@@ -551,9 +555,10 @@ public class NFTService {
         }
     }
 
-    public ResponseEntity<?> acceptOfferAuctionItem(int nftId, int auctionBidId) {
+    public ResponseEntity<?> acceptOfferAuctionItem(int nftId, int auctionBidId, Users user) {
         try {
-            int userid = 1;
+            //int userid = 1;
+            int userid = user.getUserId();
             Wallet sellerWallet = usersRepo.findById(userid).get().getWallet();
 
             NFT nft = nftRepo.findById(nftId).get();
