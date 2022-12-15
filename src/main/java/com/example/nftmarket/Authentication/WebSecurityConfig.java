@@ -1,6 +1,11 @@
 package com.example.nftmarket.Authentication;
 
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +17,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import com.example.nftmarket.UserDetails.CustomUserDetailsService;
+import com.example.nftmarket.UserDetails.UserServices;
 
 @Configuration
 @EnableWebSecurity
@@ -23,7 +31,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
     @Autowired
     private DataSource dataSource;
-     
+    
+    @Autowired
+    private UserServices service;
+    
     @Bean
     public UserDetailsService userDetailsService() {
         return new CustomUserDetailsService();
@@ -57,15 +68,46 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
             .antMatchers("/users").authenticated()
+            .antMatchers("/oauth/**").permitAll()
             .anyRequest().permitAll()
             .and()
             .formLogin()
                 .usernameParameter("username")
                 .defaultSuccessUrl("/users")
                 .permitAll()
+                .loginPage("/login")
+                .loginProcessingUrl("/process-login")
+                .failureUrl("/login?error=true")
+                .permitAll()
             .and()
-                .csrf().disable()
+            .csrf().disable()
+            .oauth2Login()
+            .loginPage("/login")
+            .userInfoEndpoint()
+                .userService(oauthUserService)
+            .and()
+            .successHandler(new AuthenticationSuccessHandler() {
+         
+                @Override
+                public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                        Authentication authentication) throws IOException, ServletException {
+         
+                    CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
+         
+                    service.processOAuthPostLogin(oauthUser.getEmail());
+         
+                    response.sendRedirect("/users");
+                }
+            })
+            .and()
+            .csrf().disable()
             .logout().logoutSuccessUrl("/").permitAll();
+            
     }
+
+    @Autowired
+    private CustomOAuth2UserService oauthUserService;
+    
+
     
 }

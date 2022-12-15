@@ -22,7 +22,9 @@ public class Wallet {
 
     public Wallet() {
     }
-
+    public Wallet(Users user) {
+    	this.user = user;
+    }
     public Wallet(int walletId, Users user, List<NFT> nftList, List<CryptoCurrencies> cryptoCurrenciesList) {
         this.walletId = walletId;
         this.user = user;
