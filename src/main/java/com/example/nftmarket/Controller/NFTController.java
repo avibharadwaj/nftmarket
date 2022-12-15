@@ -19,12 +19,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-
-
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.view.RedirectView;
 
 
 
@@ -42,21 +43,14 @@ public class NFTController {
     public String getNfts(Principal principal, Model model) throws JSONException {
         Users user = userRepo.findByEmail(principal.getName());
         ResponseEntity<?> nft = nftService.getNftsOfUser(user);
-        
-        NFT mynft = null;
-        String str = nft.getBody().toString().substring(1, nft.getBody().toString().length() - 1);
-        System.out.println("LOLLLLLLLLLLL------------"+str);
-        try {
-			 mynft = new ObjectMapper().readValue(str, NFT.class);
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        model.addAttribute("nft", mynft);
+        List<NFT> nfts = (List<NFT>) nft.getBody();
+        NFT ns =null;
+        for (NFT nf : nfts) {
+        	System.out.println("****************"+nf.getNftId());
+        	ns = nf;
+        }       
+        model.addAttribute("nfti", ns);
+        model.addAttribute("nfts", nfts);
         return "MyNFT";
     }
 
@@ -74,15 +68,18 @@ public class NFTController {
     }
 
     @PostMapping(value = "/sell")
-    public ResponseEntity<?> sellNft(
-            Principal principal,
-            @RequestParam("nftId") int nftId,
-            @RequestParam("currencyType") String currencyType,
-            @RequestParam("saleType") String saleType,
-            @RequestParam("listPrice") float listPrice
+    public RedirectView sellNft(@ModelAttribute("nfti")NFT nfti,
+            Principal principal
+            
     ) {
+//    	@RequestParam("nftId") int nftId,
+//        @RequestParam("currencyType") String currencyType,
+//        @RequestParam("saleType") String saleType,
+//        @RequestParam("listPrice") float listPrice
         Users user = userRepo.findByEmail(principal.getName());
-        return nftService.sellNft(nftId, currencyType, saleType, listPrice, user);
+        ResponseEntity<?> sold = nftService.sellNft(nfti.getNftId(), nfti.getCurrencyType(), nfti.getListingType(), nfti.getListPrice(), user);
+        //((Object) sold).sendRedirect();
+        return new RedirectView("/nft/viewAll");
     }
 
     @GetMapping(value = "/sell/viewListings")

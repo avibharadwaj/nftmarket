@@ -57,7 +57,10 @@ public class NFTService {
         Users user = usersRepo.findById(user_id).get();*/
         Wallet wallet = user.getWallet();
         List<NFT> nfts = wallet.getNftList();
-
+        //boolean boo = 0;
+        NFT mock = new NFT("tokenId",  "smartContactAddress",  "name",  "type",  "description",  "imageUrl", "assetUrl",null, false, AUCTION_BID_SUPERSEDED);
+        nfts.add(mock);
+        
         if (nfts == null || nfts.size() == 0) {
             return new ResponseEntity<>("No nfts found", HttpStatus.BAD_REQUEST);
         }
@@ -75,9 +78,11 @@ public class NFTService {
             entity.put("assetUrl", nft.getAssetUrl());
             entity.put("lastRecordTime", nft.getLastRecordTime());
             entities.add(entity);
+            System.out.println("----------------------------========="+ entity.toString());
         }
-
-        return new ResponseEntity<>(entities.toString(), HttpStatus.OK);
+        ResponseEntity<?> s = new ResponseEntity<>(entities.toString(), HttpStatus.OK);
+        System.out.println("--------------------------------"+ s.getBody());
+        return new ResponseEntity<>(nfts, HttpStatus.OK);
     }
 
     public ResponseEntity<?> addNft(String name, String type, String desc, String imageUrl, String assetUrl, Users user) {
