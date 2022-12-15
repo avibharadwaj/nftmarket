@@ -28,18 +28,18 @@
             <!-- Include .navbar-header class 
                  in <div>  (optional)-->
             <div class="navbar-header">
-                <a class="navbar-brand" href="Landing.html">
+                <a class="navbar-brand" href="Landing">
                     NFT Marketplace
                 </a>
             </div>
   
             <!-- Include navbar list -->
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/test">
+                <li><a href="/test">
                     Home
                 </a></li>
                 <li><a href="/wallet">Wallet</a></li>
-                <li><a href="/MyNFT">My NFTs</a></li>
+                <li><a href="nft/viewAll">My NFTs</a></li>
                 <li><a href="/createNFT">Create NFT</a></li>
                 <li><a href="/Buy">Buy NFT</a></li>
                 <li><a href="#">Log Out</a></li>
@@ -61,9 +61,13 @@
     <div class="row">
         <div class="col-sm-5"></div>
         <div class="col-sm-2">
-            <button type="button" class="btn btn-primary vertical-center" onclick="location.href='CurrentListedNFT.html'">Currently on SALE</button>
-            <button type="button" class="btn btn-primary vertical-center" onclick="location.href='OlderListing.html'">Older Listings</button>
-        </div>
+            <a href="CurrentListedNFT"> 
+				<button type="button" class="btn btn-primary vertical-center">Currently on SALE</button>
+			</a>
+			<a href="OlderListing"> 
+				<button type="button" class="btn btn-primary vertical-center" >Older Listings</button>
+			</a>
+</div>
         <div class="col-sm-5"></div>
     </div>
     

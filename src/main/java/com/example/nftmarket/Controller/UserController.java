@@ -45,6 +45,10 @@ public class UserController {
         return "Buy";
     }
     
+    //@GetMapping(value = "/MyNFT")
+    //public String myNFT() {
+    //    return "MyNFT";
+    //}
     
     @GetMapping(value = "/test")
     public String welcometest() {
@@ -65,30 +69,14 @@ public class UserController {
         return "SignUp";
     }
 
-    @GetMapping("/login")
-    public String showLoginForm(Model model) {
-    	System.out.println("The user on login page is:");
-    	System.out.println(model);
-        model.addAttribute("user", new Users()); 
-        return "SignIn";
-    } 
-    
     @PostMapping("/process_register")
-    public String processRegister(Users user, HttpServletRequest request, Model model)
+    public String processRegister(Users user, HttpServletRequest request)
             throws UnsupportedEncodingException, MessagingException {
     	System.out.println("Inside Process Register");
     	System.out.println(user);
     	System.out.println(request);
-    	
-    	//design a service to check if the user already exists
-    	if(service.checkUserExists(user)) {
-    		model.addAttribute("user",new Users());
-    		model.addAttribute("error",true);
-    		return "SignUp";
-    	} else {
-	        service.register(user, getSiteURL(request));
-	        return "SignUpSuccess";
-    	}
+        service.register(user, getSiteURL(request));       
+        return "SignUpSuccess";
     }
      
     private String getSiteURL(HttpServletRequest request) {

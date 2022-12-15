@@ -53,6 +53,12 @@ public class NFTController {
         model.addAttribute("nfts", nfts);
         return "MyNFT";
     }
+    
+    @RequestMapping("/CurrentListedNFT")
+    public String CurrentListedNFT() {
+    return "CurrentListedNFT"; //defect-details.html page name to open it
+    }
+
 
     @PostMapping(value = "/create")
     public ResponseEntity<?> addNft(

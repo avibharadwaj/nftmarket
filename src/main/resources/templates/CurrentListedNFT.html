@@ -28,7 +28,7 @@
             <!-- Include .navbar-header class 
                  in <div>  (optional)-->
             <div class="navbar-header">
-                <a class="navbar-brand" href="Landing.html">
+                <a class="navbar-brand" href="Landing">
                     NFT Marketplace
                 </a>
             </div>
@@ -39,7 +39,7 @@
                     Home
                 </a></li>
                 <li><a href="/wallet">Wallet</a></li>
-                <li><a href="/MyNFT">My NFTs</a></li>
+                <li><a href="nft/viewAll">My NFTs</a></li>
                 <li><a href="/createNFT">Create NFT</a></li>
                 <li><a href="/Buy">Buy NFT</a></li>
                 <li><a href="#">Log Out</a></li>
@@ -80,7 +80,7 @@ function sendPostRequest() {
   formData.append('nft_id', 'NFT1');
 
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', 'https://localhost:8083/sell/cancelListing/1', true);
+  xhr.open('POST', 'http://localhost:8083/nft/sell/cancelListing/3', true);
   xhr.onload = function() {
     if (this.status == 200) {
       // Successful POST request
