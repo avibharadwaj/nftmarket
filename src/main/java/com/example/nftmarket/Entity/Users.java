@@ -18,6 +18,19 @@ public class Users {
     @JoinColumn(name = "wallet", referencedColumnName = "walletId")
     private Wallet wallet;
 
+    
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+ 
+    public Provider getProvider() {
+        return provider;
+    }
+ 
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+        
+    
     public Users() {
     }
 

@@ -45,11 +45,7 @@ public class UserController {
         return "Buy";
     }
     
-    //@GetMapping(value = "/MyNFT")
-    //public String myNFT() {
-    //    return "MyNFT";
-    //}
-    
+
     @GetMapping(value = "/test")
     public String welcometest() {
         return "Landing";
@@ -65,45 +61,49 @@ public class UserController {
     	System.out.println("The user on register page is:");
     	System.out.println(model);
         model.addAttribute("user", new Users());
-         
+       
         return "SignUp";
     }
+    
+    @GetMapping("/login")
+    public String showLoginForm(Model model) {
+    	System.out.println("The user on login page is:");
+    	System.out.println(model);
+        model.addAttribute("user", new Users()); 
+        return "SignIn";
+    } 
+    
 
     @PostMapping("/process_register")
-    public String processRegister(Users user, HttpServletRequest request)
+    public String processRegister(Users user, HttpServletRequest request, Model model)
             throws UnsupportedEncodingException, MessagingException {
     	System.out.println("Inside Process Register");
     	System.out.println(user);
     	System.out.println(request);
-        service.register(user, getSiteURL(request));       
-        return "SignUpSuccess";
+    	
+    	//design a service to check if the user already exists
+    	if(service.checkUserExists(user)) {
+    		model.addAttribute("user",new Users());
+    		model.addAttribute("error",true);
+    		return "SignUp";
+    	} else {
+	        service.register(user, getSiteURL(request));
+	        return "SignUpSuccess";
+    	}
     }
-     
+    
+    
     private String getSiteURL(HttpServletRequest request) {
         String siteURL = request.getRequestURL().toString();
         return siteURL.replace(request.getServletPath(), "");
     } 
-//    @PostMapping("/process_register")
-//    public String processRegister(Users user) {
-//    	System.out.println("The user after registration is:");
-//    	System.out.println(user.getUsername());
-//        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//        String encodedPassword = passwordEncoder.encode(user.getPassword());
-//        user.setPassword(encodedPassword);
-//    	System.out.println(user.getPassword());
-//    	System.out.println("What is the user repo?");
-//    	System.out.println(userRepo);
-//    	
-//        userRepo.save(user);
-//         
-//        return "SignUpSuccess";
-//    }
+
 
     @GetMapping("/users")
     public String listUsers(Model model) {
         List<Users> listUsers = (List<Users>) userRepo.findAll();
         model.addAttribute("listUsers", listUsers);
-         
+        
         return "Homepage";
     }
 
@@ -111,6 +111,7 @@ public class UserController {
     public String verifyUser(@Param("code") String code) {
     	System.out.println("---Verifying code---");
         if (service.verify(code)) {
+        	System.out.println(code);
             return "verify_success";
         } else {
             return "verify_fail";

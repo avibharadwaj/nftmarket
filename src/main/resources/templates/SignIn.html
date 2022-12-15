@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Sign Up - NTM</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css" />
+    <script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container text-center">
+<div>
+    <h2>Login to NTM Marketplace</h2>
+    <br/>
+</div>
+<div>
+    <h4><a th:href="@{/oauth2/authorization/google}">Login with Google</a></h4>
+</div>
+<div><p>OR</p></div>
+  
+<form  th:action="@{/process-login}" method="post" th:object="${user}" style="max-width: 400px; margin: 0 auto;">
+<div class="border border-secondary rounded p-3">
+    <div th:if="${param.error}">
+        <p class="text-danger">Invalid email/password or User may not be verified.</p>
+    </div>
+    <div th:if="${param.logout}">
+        <p class="text-warning">You have been logged out.</p>
+    </div>
+    <div>
+        <p><input type="text" name="username" th:field="*{username}" required class="form-control" placeholder="E-mail" /></p>
+    </div>
+    <div>
+        <p><input type="password" name="password" th:field="*{password}" required class="form-control" placeholder="Password" /></p>
+    </div>
+    <div>
+        <p><input type="submit" value="Login" class="btn btn-primary" /></p>
+    </div>
+</div>
+</form>
+</div>
