@@ -14,6 +14,7 @@ public class CryptoTransactions {
     private float transactionAmount;
     private float previousBalance;
     private float updatedBalance;
+    private String currencyType;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "cryptoTransactions", fetch = FetchType.LAZY)
     private NFTCryptoTransactions nftCryptoTransactions;
@@ -21,12 +22,13 @@ public class CryptoTransactions {
     @ManyToOne
     private CryptoCurrencies cryptoCurrencies;
 
-    public CryptoTransactions(String transactionType, float transactionAmount, float previousBalance, float updatedBalance, CryptoCurrencies cryptoCurrencies) {
+    public CryptoTransactions(String transactionType, String currencyType, float transactionAmount, float previousBalance, float updatedBalance, CryptoCurrencies cryptoCurrencies) {
         this.transactionType = transactionType;
         this.transactionAmount = transactionAmount;
         this.previousBalance = previousBalance;
         this.updatedBalance = updatedBalance;
         this.cryptoCurrencies = cryptoCurrencies;
+        this.currencyType = currencyType;
     }
 
     public CryptoTransactions() {
@@ -88,4 +90,11 @@ public class CryptoTransactions {
         this.cryptoCurrencies = cryptoCurrencies;
     }
 
+    public String getCurrencyType() {
+        return currencyType;
+    }
+
+    public void setCurrencyType(String currencyType) {
+        this.currencyType = currencyType;
+    }
 }

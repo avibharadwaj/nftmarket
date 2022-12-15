@@ -83,7 +83,7 @@ public class CryptoCurrencyService {
             wallet.setCryptoCurrenciesList(cryptoCurrenciesList);
             walletRepo.save(wallet);
 
-            CryptoTransactions cryptoTransactions = new CryptoTransactions(CRYPTO_DEPOSIT, amount, currency.getBalance() - amount, currency.getBalance(), currency);
+            CryptoTransactions cryptoTransactions = new CryptoTransactions(CRYPTO_DEPOSIT, currency.getCurrencyType(), amount, currency.getBalance() - amount, currency.getBalance(), currency);
             cryptoTransactionsRepo.save(cryptoTransactions);
 
             return new ResponseEntity<>("Cryptocurrency deposit successful", HttpStatus.CREATED);
@@ -110,7 +110,7 @@ public class CryptoCurrencyService {
             }
 
             currency.setBalance(currency.getBalance() - amount);
-            CryptoTransactions cryptoTransactions = new CryptoTransactions(CRYPTO_DEPOSIT, amount, currency.getBalance() + amount, currency.getBalance(), currency);
+            CryptoTransactions cryptoTransactions = new CryptoTransactions(CRYPTO_DEPOSIT, currency.getCurrencyType(), amount, currency.getBalance() + amount, currency.getBalance(), currency);
             cryptoTransactionsRepo.save(cryptoTransactions);
 
             return new ResponseEntity<>("Cryptocurrency withdrawal successful. New balance: " + currency.getBalance(), HttpStatus.CREATED);

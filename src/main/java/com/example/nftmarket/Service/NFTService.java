@@ -51,6 +51,8 @@ public class NFTService {
     private final String AUCTION_ENDED = "ended";
     private final String AUCTION_BID_SUPERSEDED = "superseded";
     private final String AUCTION_OFFER_RESCINDED = "rescinded";
+    private final String PURCHASE_NFT = "purchase";
+    private final String SELL_NFT = "sell";
 
     public ResponseEntity<?> getNftsOfUser(Users user) throws JSONException {
         /*int user_id = 1;
@@ -303,10 +305,10 @@ public class NFTService {
             );
 
             CryptoTransactions cryptoTransactionsBuyer = new CryptoTransactions(
-                    nft.getCurrencyType(), nft.getListPrice(), prevBalance, currBalance, buyerCurrency
+                    PURCHASE_NFT, nft.getCurrencyType(), nft.getListPrice(), prevBalance, currBalance, buyerCurrency
             );
             CryptoTransactions cryptoTransactionsSeller = new CryptoTransactions(
-                    nft.getCurrencyType(), nft.getListPrice(), sellerCurrency.getBalance() - nft.getListPrice(), sellerCurrency.getBalance(), sellerCurrency
+                    SELL_NFT, nft.getCurrencyType(), nft.getListPrice(), sellerCurrency.getBalance() - nft.getListPrice(), sellerCurrency.getBalance(), sellerCurrency
             );
 
             NFTCryptoTransactions nftCryptoTransactionsBuyer = new NFTCryptoTransactions(
@@ -609,10 +611,10 @@ public class NFTService {
                     cryptoCurrencies -> cryptoCurrencies.getCurrencyType().equalsIgnoreCase(nft.getCurrencyType())
             ).findFirst().get();
             CryptoTransactions cryptoTransactionsBuyer = new CryptoTransactions(
-                    nft.getCurrencyType(), nft.getListPrice(), buyerCurrency.getBalance(), buyerCurrency.getBalance() - auctionHistory.getOfferPrice(), buyerCurrency
+                    PURCHASE_NFT, nft.getCurrencyType(), nft.getListPrice(), buyerCurrency.getBalance(), buyerCurrency.getBalance() - auctionHistory.getOfferPrice(), buyerCurrency
             );
             CryptoTransactions cryptoTransactionsSeller = new CryptoTransactions(
-                    nft.getCurrencyType(), nft.getListPrice(), sellerCurrency.getBalance() - auctionHistory.getOfferPrice(), sellerCurrency.getBalance(), sellerCurrency
+                    SELL_NFT, nft.getCurrencyType(), nft.getListPrice(), sellerCurrency.getBalance() - auctionHistory.getOfferPrice(), sellerCurrency.getBalance(), sellerCurrency
             );
 
             NFTCryptoTransactions nftCryptoTransactionsBuyer = new NFTCryptoTransactions(
