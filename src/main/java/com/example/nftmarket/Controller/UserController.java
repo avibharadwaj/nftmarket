@@ -2,6 +2,7 @@ package com.example.nftmarket.Controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.nftmarket.Entity.Users;
 import com.example.nftmarket.Repository.UsersRepo;
@@ -32,6 +33,31 @@ public class UserController {
     @GetMapping(value = "/user")
     public String welcome() {
         return "Index";
+    }
+    
+    @GetMapping(value = "/createNFT")
+    public String createNFT() {
+        return "createNFT";
+    }
+    
+    @GetMapping(value = "/Buy")
+    public String buy() {
+        return "Buy";
+    }
+    
+    @GetMapping(value = "/MyNFT")
+    public String myNFT() {
+        return "MyNFT";
+    }
+    
+    @GetMapping(value = "/test")
+    public String welcometest() {
+        return "Landing";
+    }
+    
+    @RequestMapping("/wallet")
+    public String defectDetails() {
+        return "wallet"; //defect-details.html page name to open it
     }
 
     @GetMapping("/register")
