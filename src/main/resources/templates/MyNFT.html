@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    
+        <head>
+    <title>Bootstrap NavBar Example</title>
+    <meta charset="utf-8" />
+    <!-- Include bootstrap, CSS and jQuery CDN -->
+    <meta name="viewport" content=
+        "width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href=
+"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <script src=
+"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js">
+    </script>
+    <script src=
+"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js">
+    </script>
+</head>
+    
+    <body>
+    <!-- Add <nav> tag with .navbar and
+         .navbar-default class -->
+    <nav class="navbar navbar-default">
+  
+        <!-- Add navbar content -->
+        <div class="container-fluid">
+  
+            <!-- Include .navbar-header class 
+                 in <div>  (optional)-->
+            <div class="navbar-header">
+                <a class="navbar-brand" href="Landing.html">
+                    NFT Marketplace
+                </a>
+            </div>
+  
+            <!-- Include navbar list -->
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/Test.html">
+                    Home
+                </a></li>
+                <li><a href="wallet.html">Wallet</a></li>
+                <li><a href="MyNFT.html">My NFTs</a></li>
+                <li><a href="createNFT.html">Create NFT</a></li>
+                <li><a href="Buy.html">Buy NFT</a></li>
+                <li><a href="#">Log Out</a></li>
+
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Sample page content
+    <div class="container">
+        
+    </div> -->
+    <div class="row">
+        <div class="col-sm-12">
+            <h1 class="text-center">NFTs on SALE</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-2">
+            <button type="button" class="btn btn-primary vertical-center" onclick="location.href='CurrentListedNFT.html'">Currently on SALE</button>
+            <button type="button" class="btn btn-primary vertical-center" onclick="location.href='OlderListing.html'">Older Listings</button>
+        </div>
+        <div class="col-sm-5"></div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12">
+            <h1 class="text-center">All Availble NFTs</h1>
+        </div>
+    </div>
+
+    <!-- NFT selling page -->
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4 ">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">NFT 1</div>
+                    <div class="panel-body
+                        text-center">
+                        <img src="https://www.w3schools.com/bootstrap/paris.jpg" class="img-responsive" style="width:100%" alt="Image">
+                    </div>
+                    <div class="panel-footer">
+                        <button class="btn btn-primary">Sell</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">NFT 2</div>
+                    <div class="panel-body
+                        text-center">
+                        <img src="https://www.w3schools.com/bootstrap/paris.jpg" class="img-responsive" style="width:100%" alt="Image">
+                    </div>
+                    <div class="panel-footer">
+                        <button class="btn btn-primary">Sell</button>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">NFT 3</div>
+                    <div class="panel-body  text-center">
+                        <img src="https://www.w3schools.com/bootstrap/paris.jpg" class="img-responsive" style="width:100%" alt="Image">
+                    </div>
+                    <div class="panel-footer">
+                        <button class="btn btn-primary">Sell</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    
+    
+
+</body>
+</html>
