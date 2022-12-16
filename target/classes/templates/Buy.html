@@ -56,9 +56,9 @@
     <!-- NFT landing page -->
     <div class="container">
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-4" th:each="oneNftb: ${nftsbuy}">
                 <div class="panel panel-primary">
-                    <div class="panel-heading">NFT 1</div>
+                    <div class="panel-heading">NFTID :<span th:text="${oneNftb.nftId}"></span></div>
                     <div class="panel-body
                         text-center">
                         <a data-toggle="collapse" href="#collapse1">
@@ -67,50 +67,17 @@
                     </div>
                     <div id="collapse1" class="panel-collapse collapse">
                     <div class="panel-body
-                    ">NFT 1 details</div>
+                    "><p th:text="${oneNftb.description}" />
+                    <span th:text="${oneNftb.listPrice}" ></span><bold><span th:text="${oneNftb.currencyType}" ></span></bold>
+                    <p th:text="${oneNftb.listingType}" />
+                    </div>
                 </div>
                     <div class="panel-footer">
                         <button class="btn btn-primary">Buy</button>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-4">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">NFT 2</div>
-                    <div class="panel-body
-                        text-center">
-                        <a data-toggle="collapse" href="#collapse2">
-                        <img src="https://www.w3schools.com/bootstrap/paris.jpg" class="img-responsive" style="width:100%" alt="Image">
-                    </a>
-                    </div>
-                    <div id="collapse2" class="panel-collapse collapse">
-                    <div class="panel-body
-                    ">NFT 2 details</div>
-                </div>
-                    <div class="panel-footer">
-                        <button class="btn btn-primary">Buy</button>
-
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-4">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">NFT 3</div>
-                    <div class="panel-body
-                        text-center">
-                        <a data-toggle="collapse" href="#collapse3">
-                        <img src="https://www.w3schools.com/bootstrap/paris.jpg" class="img-responsive" style="width:100%" alt="Image">
-                    </a>
-                    </div>
-                    <div id="collapse3" class="panel-collapse collapse">
-                    <div class="panel-body
-                    ">NFT 3 details</div>
-                </div>
-                    <div class="panel-footer">
-                        <button class="btn btn-primary">Buy</button>
-                    </div>
-                </div>
-            </div>
+            
         </div>
     </div>
     

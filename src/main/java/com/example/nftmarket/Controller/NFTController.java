@@ -49,11 +49,13 @@ public class NFTController {
         	System.out.println("****************"+nf.getNftId());
         	ns = nf;
         }       
+        model.addAttribute("createdNft", new NFT());
         model.addAttribute("nfti", ns);
         model.addAttribute("nfts", nfts);
         return "MyNFT";
     }
     
+
     @RequestMapping("/CurrentListedNFT")
     public String CurrentListedNFT() {
     return "CurrentListedNFT"; //defect-details.html page name to open it
@@ -61,16 +63,17 @@ public class NFTController {
 
 
     @PostMapping(value = "/create")
-    public ResponseEntity<?> addNft(
-            Principal principal,
-            @RequestParam("name") String name,
-            @RequestParam("type") String type,
-            @RequestParam("description") String desc,
-            @RequestParam("image_url") String imageUrl,
-            @RequestParam("asset_url") String assetUrl
+    public RedirectView addNft(@ModelAttribute("createdNft")NFT createdNft,
+            Principal principal
     ) {
+//    	@RequestParam("name") String name,
+//        @RequestParam("type") String type,
+//        @RequestParam("description") String desc,
+//        @RequestParam("image_url") String imageUrl,
+//        @RequestParam("asset_url") String assetUrl
         Users user = userRepo.findByEmail(principal.getName());
-        return nftService.addNft(name, type, desc, imageUrl, assetUrl, user);
+        ResponseEntity<?> created = nftService.addNft(createdNft.getName(), createdNft.getListingType(), createdNft.getDescription(), createdNft.getImageUrl(), createdNft.getAssetUrl(), user);
+        return new RedirectView("/nft/viewAll");
     }
 
     @PostMapping(value = "/sell")
@@ -83,6 +86,10 @@ public class NFTController {
 //        @RequestParam("saleType") String saleType,
 //        @RequestParam("listPrice") float listPrice
         Users user = userRepo.findByEmail(principal.getName());
+        System.out.println("%%%%%ID%%%%%%%%"+ nfti.getNftId());
+        System.out.println("%%%%%money%%%%%%%%"+ nfti.getCurrencyType());
+        System.out.println("%%%%%%SALETYPE%%%%%%%%%"+ nfti.getListingType());
+        System.out.println("%%%%%%%%PRICE%%%%%%"+ nfti.getListPrice());
         ResponseEntity<?> sold = nftService.sellNft(nfti.getNftId(), nfti.getCurrencyType(), nfti.getListingType(), nfti.getListPrice(), user);
         //((Object) sold).sendRedirect();
         return new RedirectView("/nft/viewAll");
@@ -101,9 +108,19 @@ public class NFTController {
     }
 
     @GetMapping(value = "/buy/viewListings")
-    public ResponseEntity<?> viewOnSaleNfts(Principal principal) throws JSONException {
+    public String viewOnSaleNfts(Principal principal, Model model) throws JSONException {
         Users user = userRepo.findByEmail(principal.getName());
-        return nftService.viewOnSaleNfts(user);
+        ResponseEntity<?> nft = nftService.viewOnSaleNfts(user);
+        List<NFT> nftsbuy = (List<NFT>) nft.getBody();
+        NFT ns =null;
+        for (NFT nf : nftsbuy) {
+        	System.out.println("****************"+nf.getNftId());
+        	ns = nf;
+        }       
+        //model.addAttribute("createdNft", new NFT());
+        //model.addAttribute("nfti", ns);
+        model.addAttribute("nftsbuy", nftsbuy);
+        return "Buy";
     }
 
     @PostMapping(value = "/buy/pricedItem/{nftId}")

@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.example.nftmarket.Entity.NFT;
 import com.example.nftmarket.Entity.Users;
 import com.example.nftmarket.Repository.UsersRepo;
 import com.example.nftmarket.UserDetails.UserServices;
@@ -36,7 +37,8 @@ public class UserController {
     }
     
     @GetMapping(value = "/createNFT")
-    public String createNFT() {
+    public String createNFT(Model model) {
+        model.addAttribute("createdNft", new NFT());
         return "createNFT";
     }
     
@@ -47,7 +49,8 @@ public class UserController {
     
     
     @GetMapping(value = "/test")
-    public String welcometest() {
+    public String welcometest(Model model) {
+    	//model.addAttribute("createdNft", new NFT());
         return "Landing";
     }
     

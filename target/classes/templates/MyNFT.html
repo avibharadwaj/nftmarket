@@ -114,13 +114,20 @@
 										<form class="membership-form webform" th:action="@{/nft/sell}" th:object="${nfti}"
 											role="form" method="POST">
 											
-											<!-- <input type="hidden" id="nftId" th:field="*{nftId}" name="nftId" value="1"> -->
+											<input type="number" id="nftId" th:field="*{nftId}" name="nftId" th:value=1>
 
-											<label for="cars">Choose the type:</label> <select id="cars"
-												name="cars">
-												<option value="volvo">BTC</option>
-												<option value="saab">ETH</option>
+											<label for="sale">Choose the type:</label> <select id="sale" th:field="*{listingType}"
+												name="sale">
+												<option th:value="Auction">Auction</option>
+												<option th:value="Priced">Priced</option>
 											</select> 
+											
+											<label for="cars">Choose Sale type:</label> <select id="cars" th:field="*{currencyType}"
+												name="cars">
+												<option  th:value="BTC">BTC</option>
+												<option  th:value="ETH">ETH</option>
+											</select> 
+											
 											<input type="text" th:field = "*{listPrice}" class="form-control"  name="amount"
 												placeholder="amount">
 											<button type="submit" class="form-control" id="submit-button"
